@@ -12,12 +12,12 @@ class ErrorValidacion:
 
 def verifica_eva(eva):
     errores = []
-    if sn_eva(eva.txt_sn):
-        errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, eva.txt_sn, 'SN Incorrecta'))
-    if tipo_llamada(eva.tipo_llamada):
-        errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, eva.tipo_llamada, 'Tipo de llamada incorrecto'))
-    if motivo_llamada(eva.motivo_llamada):
-        errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, eva.motivo_llamada, 'Motivo de llamada incorrecto'))
+    if sn_eva(eva.txt_sn) is not None:
+        errores.append(sn_eva(eva.txt_sn))
+    if tipo_llamada(eva.tipo_llamada) is not None:
+        errores.append(tipo_llamada(eva.tipo_llamada))
+    if motivo_llamada(eva.motivo_llamada) is not None:
+        errores.append(motivo_llamada(eva.motivo_llamada))
 
     if len(errores) == 0:
         print('No se encontraron errores')
@@ -28,22 +28,27 @@ def verifica_eva(eva):
 
 
 def sn_eva(sn):
+    msg_error = 'SN Incorrecta'
     if sn is None:
-        return True
-    return bool(search(r'[^0-9]+', sn))
+        return msg_error
+    if bool(search(r'[^0-9]+', sn)):
+        return msg_error
+    return None
 
 
 def tipo_llamada(tipo):
+    msg_error = 'Tipo de llamada incorrecto'
     if tipo is None:
-        return True
+        return msg_error
     elif tipo != 'INFORMATIVO' and tipo != 'RECLAMO' and tipo != 'VARIACION':
-        return True
-    return False
+        return msg_error
+    return None
 
 
 def motivo_llamada(motivo):
+    msg_error = 'Motivo de llamada incorrecto'
     if motivo is None:
-        return True
+        return msg_error
     elif motivo == 'SELECCIONAR':
-        return True
-    return False
+        return msg_error
+    return None
