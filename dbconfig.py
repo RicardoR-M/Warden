@@ -1,51 +1,46 @@
-from datetime import date
-from pprint import pprint
-
-from sqlalchemy import create_engine, MetaData, select, and_, Table, Column, Integer
+from sqlalchemy import create_engine, MetaData, select, and_
 from sqlalchemy.engine.url import URL
 
-from validaciones import verifica_eva
+from config import mes_auditoria, year_auditoria
 
 evas_db = {'drivername': 'mssql+pyodbc',
            'username': 'readonly',
            'password': 'readonly',
            'host': '10.197.91.1',
            'database': 'CLARO_IN_CALIDAD',
-           'query': {'driver': 'ODBC Driver 11 for SQL Server'}}
-internal_db = {'drivername': 'sqlite',
-               'database': 'interno.db'}
+           'query': {'driver': 'ODBC Driver 13 for SQL Server'}}
 
-db_uri = URL(**evas_db)
-interno_uri = URL(**internal_db)
+errores_db = {'drivername': 'mssql+pyodbc',
+              'username': 'sa',
+              'password': '***REMOVED***',
+              'host': '10.197.91.1',
+              'database': 'CLARO_IN_CALIDAD',
+              'query': {'driver': 'ODBC Driver 13 for SQL Server'}}
 
-engine = create_engine(db_uri)
-engine_interno = create_engine(interno_uri)
+db_postpago = URL(**evas_db)
+db_errores = URL(**errores_db)
+
+engine_postpago = create_engine(db_postpago, echo=False)
+engine_errores = create_engine(db_errores)
 
 metadata = MetaData()
-metadata.reflect(bind=engine)
-metadata_interno = MetaData(engine_interno)
-tabla_interno = Table('Procesado', metadata_interno, Column('id', Integer))
-metadata_interno.create_all()
+metadata.reflect(bind=engine_postpago)
+# metadata_interno.create_all()
 
-conn = engine.connect()
-conn_interno = engine_interno.connect()
-conn_interno.execute('DELETE FROM Procesado')
-# result = engine.execute('SELECT * FROM Evas_postpago2')
+conn = engine_postpago.connect()
+# result = engine_postpago.execute('SELECT * FROM Evas_postpago2')
 
-result = [r for r, in conn_interno.execute(select([tabla_interno.c.id]))]
-
-evas_table = metadata.tables['Evas_postpago2']
-select_evas = select([evas_table]).where(and_(evas_table.c.idform_cross != None,
-                                              evas_table.c.DIA_FLL == 26,
-                                              evas_table.c.TIPO_EVALUACION == 'CALIDAD_DYNAMICALL'))  # , evas_table.c.idform_cross.notin_(result)))
-
-res = conn.execute(select_evas)
-for _r in res:
-    verifica_eva(_r)
-
-# for _r in res:
-#
-#     conn_interno.execute(tabla_interno.insert().values(id=_r.idform_cross))
-
-for _r in res:
-    print(_r)
+postpago_table = metadata.tables['Evas_postpago2']
+select_evas_postpago = select([postpago_table.c.txt_sn,
+                               postpago_table.c.tipo_llamada,
+                               postpago_table.c.motivo_llamada,
+                               postpago_table.c.idform_cross,
+                               postpago_table.c.evaluador,
+                               postpago_table.c.CALIFICACION_FINAL,
+                               postpago_table.c.detecta_mala_practica,
+                               postpago_table.c.fecha_llamada,
+                               postpago_table.c.Fecha_monitoreo,
+                               postpago_table.c.TIPO_EVALUACION]).where(and_(postpago_table.c.idform_cross is not None,
+                                                                             postpago_table.c.MES_FLL == mes_auditoria(),
+                                                                             postpago_table.c.AÑO_FLL == year_auditoria(),
+                                                                             postpago_table.c.TIPO_EVALUACION.in_(('CALIDAD_DYNAMICALL', 'MONITOREO_CRUZADO_MDY'))))  # , postpago_table.c.idform_cross.notin_(result)))

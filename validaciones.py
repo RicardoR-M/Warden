@@ -1,30 +1,40 @@
+from datetime import datetime
 from re import search
 
+from config import evaluador_cruzado
 
-class ErrorValidacion:
-    def __init__(self, id_eva, sn, evaluador, original, msg):
-        self.id_eva = id_eva
-        self.sn = sn
-        self.evaluador = evaluador
-        self.msg = msg
-        self.original = original
+
+# class ErrorValidacion:
+#     def __init__(self, id_eva, sn, evaluador, original, msg):
+#         self.id_eva = id_eva
+#         self.sn = sn
+#         self.evaluador = evaluador
+#         self.msg = msg
+#         self.original = original
 
 
 def verifica_eva(eva):
     errores = []
-    if sn_eva(eva.txt_sn) is not None:
-        errores.append(sn_eva(eva.txt_sn))
-    if tipo_llamada(eva.tipo_llamada) is not None:
-        errores.append(tipo_llamada(eva.tipo_llamada))
-    if motivo_llamada(eva.motivo_llamada) is not None:
-        errores.append(motivo_llamada(eva.motivo_llamada))
+    if sn_eva(eva.txt_sn):
+        # errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, eva.txt_sn, sn_eva(eva.txt_sn)))
+        errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': eva.txt_sn, 'msg': sn_eva(eva.txt_sn), 'timestamp': datetime.today()})
+    if tipo_llamada(eva.tipo_llamada):
+        # errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, eva.tipo_llamada, tipo_llamada(eva.tipo_llamada)))
+        errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': eva.tipo_llamada, 'msg': tipo_llamada(eva.tipo_llamada), 'timestamp': datetime.today()})
+    if motivo_llamada(eva.motivo_llamada):
+        # errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, eva.motivo_llamada, motivo_llamada(eva.motivo_llamada)))
+        errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': eva.motivo_llamada, 'msg': motivo_llamada(eva.motivo_llamada), 'timestamp': datetime.today()})
+    if mala_praxis(eva.CALIFICACION_FINAL, eva.detecta_mala_practica):
+        # errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, 'Mala praxis', mala_praxis(eva.CALIFICACION_FINAL, eva.detecta_mala_practica)))
+        errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': 'Mala praxis', 'msg': mala_praxis(eva.CALIFICACION_FINAL, eva.detecta_mala_practica), 'timestamp': datetime.today()})
+    if eva_dentroplazo(eva.Fecha_monitoreo, eva.txt_sn, eva.evaluador):
+        # errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, 'Eva fuera de fecha', eva_dentroplazo(eva.Fecha_monitoreo, eva.txt_sn, eva.evaluador)))
+        errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': 'Eva fuera de fecha', 'msg': eva_dentroplazo(eva.Fecha_monitoreo, eva.txt_sn, eva.evaluador), 'timestamp': datetime.today()})
+    if tipo_monitoreo(eva.TIPO_EVALUACION, eva.evaluador):
+        # errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, eva.TIPO_EVALUACION, tipo_monitoreo(eva.TIPO_EVALUACION, eva.evaluador)))
+        errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': eva.TIPO_EVALUACION, 'msg': tipo_monitoreo(eva.TIPO_EVALUACION, eva.evaluador), 'timestamp': datetime.today()})
 
-    if len(errores) == 0:
-        print('No se encontraron errores')
-    else:
-        print('Se encontraron los siguientes errores:')
-        for i, _e in enumerate(errores):
-            print(f'{i}: ID:{_e.id_eva} - E:{_e.evaluador} - SN:{_e.sn} - MSG:{_e.msg} - O:{_e.original}')
+    return errores
 
 
 def sn_eva(sn):
@@ -50,5 +60,27 @@ def motivo_llamada(motivo):
     if motivo is None:
         return msg_error
     elif motivo == 'SELECCIONAR':
+        return msg_error
+    return None
+
+
+def mala_praxis(calificacion, mpraxis):
+    msg_error = 'No se selecciono motivo de mala praxis'
+    if calificacion == 0 and (mpraxis == 'NO' or mpraxis == 'SELECCIONAR'):
+        return msg_error
+    return None
+
+
+def eva_dentroplazo(fmon, sn, evaluador):
+    msg_error = 'Evaluación mayor a '
+    feva = datetime.strptime(sn.strip()[0:6], '%y%m%d')
+    if (fmon.date() - feva.date()).days > 2 and evaluador not in evaluador_cruzado():
+        return msg_error + f'{(fmon.date() - feva.date()).days * 24}H'
+    return None
+
+
+def tipo_monitoreo(tipo, evaluador):
+    msg_error = 'Tipo de monitoreo no coincide con evaluador'
+    if ('CALIDAD' in tipo.upper() and evaluador in evaluador_cruzado()) or ('CRUZADO' in tipo.upper() and evaluador not in evaluador_cruzado()):
         return msg_error
     return None
