@@ -13,26 +13,36 @@ from config import evaluador_cruzado
 #         self.original = original
 
 
-def verifica_eva(eva):
+def verifica_eva(eva, skill):
     errores = []
     if sn_eva(eva.txt_sn):
         # errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, eva.txt_sn, sn_eva(eva.txt_sn)))
-        errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': eva.txt_sn, 'msg': sn_eva(eva.txt_sn), 'timestamp': datetime.today()})
-    if tipo_llamada(eva.tipo_llamada):
-        # errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, eva.tipo_llamada, tipo_llamada(eva.tipo_llamada)))
-        errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': eva.tipo_llamada, 'msg': tipo_llamada(eva.tipo_llamada), 'timestamp': datetime.today()})
+        errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': eva.txt_sn, 'msg': sn_eva(eva.txt_sn), 'skill': skill, 'timestamp': datetime.today()})
+    if skill.upper() == 'POST':
+        if tipo_llamada(eva.tipo_llamada):
+            # errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, eva.tipo_llamada, tipo_llamada(eva.tipo_llamada)))
+            errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': eva.tipo_llamada, 'msg': tipo_llamada(eva.tipo_llamada), 'skill': skill, 'timestamp': datetime.today()})
+    else:
+        if tipo_llamada(eva.TipoLlamada):
+            # errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, eva.tipo_llamada, tipo_llamada(eva.tipo_llamada)))
+            errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': eva.TipoLlamada, 'msg': tipo_llamada(eva.TipoLlamada), 'skill': skill, 'timestamp': datetime.today()})
     if motivo_llamada(eva.motivo_llamada):
         # errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, eva.motivo_llamada, motivo_llamada(eva.motivo_llamada)))
-        errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': eva.motivo_llamada, 'msg': motivo_llamada(eva.motivo_llamada), 'timestamp': datetime.today()})
-    if mala_praxis(eva.CALIFICACION_FINAL, eva.detecta_mala_practica):
-        # errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, 'Mala praxis', mala_praxis(eva.CALIFICACION_FINAL, eva.detecta_mala_practica)))
-        errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': 'Mala praxis', 'msg': mala_praxis(eva.CALIFICACION_FINAL, eva.detecta_mala_practica), 'timestamp': datetime.today()})
+        errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': eva.motivo_llamada, 'msg': motivo_llamada(eva.motivo_llamada), 'skill': skill, 'timestamp': datetime.today()})
+    if skill.upper() == 'POST':
+        if mala_praxis(eva.CALIFICACION_FINAL, eva.detecta_mala_practica, skill):
+            # errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, 'Mala praxis', mala_praxis(eva.CALIFICACION_FINAL, eva.detecta_mala_practica)))
+            errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': 'Mala praxis', 'msg': mala_praxis(eva.CALIFICACION_FINAL, eva.detecta_mala_practica, skill), 'skill': skill, 'timestamp': datetime.today()})
+    else:
+        if mala_praxis(eva.CALIFICACION_FINAL, eva.MALA_PRACTICA, skill):
+            # errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, 'Mala praxis', mala_praxis(eva.CALIFICACION_FINAL, eva.detecta_mala_practica)))
+            errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': 'Mala praxis', 'msg': mala_praxis(eva.CALIFICACION_FINAL, eva.MALA_PRACTICA, skill), 'skill': skill, 'timestamp': datetime.today()})
     if eva_dentroplazo(eva.Fecha_monitoreo, eva.txt_sn, eva.evaluador):
         # errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, 'Eva fuera de fecha', eva_dentroplazo(eva.Fecha_monitoreo, eva.txt_sn, eva.evaluador)))
-        errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': 'Eva fuera de fecha', 'msg': eva_dentroplazo(eva.Fecha_monitoreo, eva.txt_sn, eva.evaluador), 'timestamp': datetime.today()})
+        errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': 'Eva fuera de fecha', 'msg': eva_dentroplazo(eva.Fecha_monitoreo, eva.txt_sn, eva.evaluador), 'skill': skill, 'timestamp': datetime.today()})
     if tipo_monitoreo(eva.TIPO_EVALUACION, eva.evaluador):
         # errores.append(ErrorValidacion(eva.idform_cross, eva.txt_sn, eva.evaluador, eva.TIPO_EVALUACION, tipo_monitoreo(eva.TIPO_EVALUACION, eva.evaluador)))
-        errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': eva.TIPO_EVALUACION, 'msg': tipo_monitoreo(eva.TIPO_EVALUACION, eva.evaluador), 'timestamp': datetime.today()})
+        errores.append({'id_eva': eva.idform_cross, 'sn': eva.txt_sn, 'evaluador': eva.evaluador, 'original': eva.TIPO_EVALUACION, 'msg': tipo_monitoreo(eva.TIPO_EVALUACION, eva.evaluador), 'skill': skill, 'timestamp': datetime.today()})
 
     return errores
 
@@ -64,10 +74,14 @@ def motivo_llamada(motivo):
     return None
 
 
-def mala_praxis(calificacion, mpraxis):
+def mala_praxis(calificacion, mpraxis, skill):
     msg_error = 'No se selecciono motivo de mala praxis'
-    if calificacion == 0 and (mpraxis == 'NO' or mpraxis == 'SELECCIONAR'):
-        return msg_error
+    if skill == 'POST':
+        if calificacion == 0 and (mpraxis == 'NO' or mpraxis == 'SELECCIONAR'):
+            return msg_error
+    else:
+        if calificacion == 0 and mpraxis == 0:
+            return msg_error
     return None
 
 

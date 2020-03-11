@@ -3,7 +3,7 @@ def evaluador_cruzado():
 
 
 def mes_auditoria():
-    return 2
+    return 3
 
 
 def year_auditoria():
