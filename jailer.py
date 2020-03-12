@@ -32,9 +32,6 @@ if __name__ == '__main__':
 
     df_total.drop_duplicates(subset=['id_eva', 'sn', 'evaluador', 'original', 'msg'], keep='first', inplace=True)
 
-    print(df_local)
-    print(df_server)
-
     df_total.to_sql(name='APP_ERRORES',
                     con=engine_errores,
                     if_exists='replace',

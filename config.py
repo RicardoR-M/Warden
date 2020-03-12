@@ -1,5 +1,5 @@
 def evaluador_cruzado():
-    return ['***REMOVED***']
+    return ['***REMOVED***', '***REMOVED***', '***REMOVED***']
 
 
 def mes_auditoria():
